@@ -61,17 +61,30 @@ Visit the [report](Challenges/Challenge_3/resources/Deliverables/report.pdf) and
 
 ## Project: LoraWAN-like Sensor Network 💻
 
-***Descrizione del problema***
+The project assignment asked to implement a network architecture similar to LoraWAN in TinyOS.
+
+In particular, we had to respect the following requirements:
+* The topology counts five sensor nodes, two gateways, and one server node. as illustrated in the following figure
 
 <p align="center">
   <img src="Project/images/network.png" alt="network"/>
 </p>
 
+* Each sensor node periodically transmits (random) data, which is received by one or more gateways, which forward the received data to the network server.
+* Network server removes duplicated messages. An ACK message is sent back to the forwarding gateway, which in turn transmits it to the nodes. If a node does not receive an ACK within a 1-second window, the message is re-transmitted.
+* The network server node should be connected to Node-RED, and periodically transmit data from sensor nodes to our private Thingspeak channel through MQTT.
+* Thingspeak must show at least three charts on a public channel.
+
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ## Implementation 🎯
 
-***Descrizione della soluzione***
+In this section we list the key concepts we adopted and implemented in our solution of the project:
+* `transmitted_to_second_gateway`: this boolean variable is used to manage transmission of a message from a sensor node to both the gateway (for those nodes that should do it by topology). After the transmission of the first copy of the message, and we need to transmit the second one, we check this variable when the `sendDone` event is triggered: if it is FALSE we start again the sending process to forward the data to the second gateway, otherwise we ignore the event.
+*  `last_message_transmitted msg_tx`: when a sensor node sends a message, it saves its content inside this variable in order to be able to fetch the data again in case if the 1-second window elapses and a retransmission is needed.
+*  `last_message_received msg_from_sensor[SENSOR_NODES]`: the server keeps track of the last message it received from all the sensor nodes. In this way, it can recognize duplicates and discard them.
+
+If you would like to know how the send and receive function are implemented in details, you could check out the script [SenseNetC.nc](Project/src/SenseNetC.nc).
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
